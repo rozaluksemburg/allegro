@@ -6,9 +6,9 @@ use crate::components::layout::Layout;
 pub fn App() -> impl IntoView {
     view! {
         <Stylesheet id="leptos" href="/style/output.css"/>
-        <Layout />
+        <Layout /> // лучшая абстракция 
     }
-}
+} // shuba 
 
 
 

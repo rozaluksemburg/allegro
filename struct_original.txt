@@ -44,108 +44,108 @@ heads  C:\rust\projects\marketplace\31072024\heads\heads
       </code mod.rs>
       city_input.rs
       <code city_input.rs>
-// src/components/city_input.rs
+      // src/components/city_input.rs
 
-use leptos::*;
+      use leptos::*;
 
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct City {
-    name: String,
-    has_sellers: bool,
-}
+      #[derive(Clone, Debug, PartialEq, Eq)]
+      pub struct City {
+          name: String,
+          has_sellers: bool,
+      }
 
-#[component]
-pub fn CityInput() -> impl IntoView {
-    let (input, set_input) = create_signal(String::new());
-    let (selected_city, set_selected_city) = create_signal(None::<City>);
-    let (error_message, set_error_message) = create_signal(String::new());
+      #[component]
+      pub fn CityInput() -> impl IntoView {
+          let (input, set_input) = create_signal(String::new());
+          let (selected_city, set_selected_city) = create_signal(None::<City>);
+          let (error_message, set_error_message) = create_signal(String::new());
 
-    let cities = vec![
-        City { name: "Москва".to_string(), has_sellers: true },
-        City { name: "Санкт-Петербург".to_string(), has_sellers: true },
-        City { name: "Новосибирск".to_string(), has_sellers: true },
-        City { name: "Екатеринбург".to_string(), has_sellers: true },
-        City { name: "Казань".to_string(), has_sellers: false },
-    ];
+          let cities = vec![
+              City { name: "Москва".to_string(), has_sellers: true },
+              City { name: "Санкт-Петербург".to_string(), has_sellers: true },
+              City { name: "Новосибирск".to_string(), has_sellers: true },
+              City { name: "Екатеринбург".to_string(), has_sellers: true },
+              City { name: "Казань".to_string(), has_sellers: false },
+          ];
 
-    let filtered_cities = create_memo(move |_| {
-        let input = input.get().to_lowercase();
-        cities
-            .iter()
-            .filter(|city| city.name.to_lowercase().starts_with(&input))
-            .cloned()
-            .collect::<Vec<_>>()
-    });
+          let filtered_cities = create_memo(move |_| {
+              let input = input.get().to_lowercase();
+              cities
+                  .iter()
+                  .filter(|city| city.name.to_lowercase().starts_with(&input))
+                  .cloned()
+                  .collect::<Vec<_>>()
+          });
 
-    let handle_select = move |city: City| {
-        set_input.set(city.name.clone());
-        set_selected_city.set(Some(city));
-        set_error_message.set(String::new());
-    };
+          let handle_select = move |city: City| {
+              set_input.set(city.name.clone());
+              set_selected_city.set(Some(city));
+              set_error_message.set(String::new());
+          };
 
-    let handle_submit = move |_| {
-        if let Some(city) = selected_city.get() {
-            if !city.has_sellers {
-                set_error_message.set("В указанном городе нет продавцов. Возможно, вы ошиблись при вводе города? Попробуйте ввести город заново или просто укажите другой. Если вы хотите стать первым продавцом для нового города, то вы можете сделать это при добавлении нового товара через личный кабинет".to_string());
-            }
-        } else {
-            set_error_message.set("Пожалуйста, выберите город из списка".to_string());
-        }
-    };
+          let handle_submit = move |_| {
+              if let Some(city) = selected_city.get() {
+                  if !city.has_sellers {
+                      set_error_message.set("В указанном городе нет продавцов. Возможно, вы ошиблись при вводе города? Попробуйте ввести город заново или просто укажите другой. Если вы хотите стать первым продавцом для нового города, то вы можете сделать это при добавлении нового товара через личный кабинет".to_string());
+                  }
+              } else {
+                  set_error_message.set("Пожалуйста, выберите город из списка".to_string());
+              }
+          };
 
-    view! {
-        <div class="max-w-md mx-auto mt-10 bg-white p-6 rounded-xl shadow-lg">
-            <label for="city-input" class="block text-lg font-semibold text-gray-700 mb-2">
-                "Выберите город"
-            </label>
-            <div class="relative">
-                <input
-                    id="city-input"
-                    type="text"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-300 ease-in-out"
-                    placeholder="Начните вводить название города"
-                    prop:value=input
-                    on:input=move |ev| set_input.set(event_target_value(&ev))
-                />
-                <ul class="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto">
-                    {move || filtered_cities.get().into_iter().map(|city| {
-                        let city_clone = city.clone();
-                        view! {
-                            <li
-                                class="cursor-pointer py-2 px-4 hover:bg-green-100 transition duration-200"
-                                on:click=move |_| handle_select(city_clone.clone())
-                            >
-                                <span class="font-medium">{city.name}</span>
-                                {if city.has_sellers {
-                                    view! { <span class="ml-2 text-sm text-green-600">"(есть продавцы)"</span> }
-                                } else {
-                                    view! { <span class="ml-2 text-sm text-gray-400">"(нет продавцов)"</span> }
-                                }}
-                            </li>
-                        }
-                    }).collect::<Vec<_>>()}
-                </ul>
-            </div>
-            <button
-                class="mt-4 w-full px-4 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-300 ease-in-out"
-                on:click=handle_submit
-            >
-                "Подтвердить город"
-            </button>
-            {move || {
-                let error = error_message.get();
-                if !error.is_empty() {
-                    view! {
-                        <p class="mt-2 text-sm text-red-600 bg-red-100 p-2 rounded">{error}</p>
-                    }
-                } else {
-                    view! { <p></p> }
-                }
-            }}
-        </div>
-    }
-}
-</code city_input.rs>
+          view! {
+              <div class="max-w-md mx-auto mt-10 bg-white p-6 rounded-xl shadow-lg">
+                  <label for="city-input" class="block text-lg font-semibold text-gray-700 mb-2">
+                      "Выберите город"
+                  </label>
+                  <div class="relative">
+                      <input
+                          id="city-input"
+                          type="text"
+                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-300 ease-in-out"
+                          placeholder="Начните вводить название города"
+                          prop:value=input
+                          on:input=move |ev| set_input.set(event_target_value(&ev))
+                      />
+                      <ul class="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto">
+                          {move || filtered_cities.get().into_iter().map(|city| {
+                              let city_clone = city.clone();
+                              view! {
+                                  <li
+                                      class="cursor-pointer py-2 px-4 hover:bg-green-100 transition duration-200"
+                                      on:click=move |_| handle_select(city_clone.clone())
+                                  >
+                                      <span class="font-medium">{city.name}</span>
+                                      {if city.has_sellers {
+                                          view! { <span class="ml-2 text-sm text-green-600">"(есть продавцы)"</span> }
+                                      } else {
+                                          view! { <span class="ml-2 text-sm text-gray-400">"(нет продавцов)"</span> }
+                                      }}
+                                  </li>
+                              }
+                          }).collect::<Vec<_>>()}
+                      </ul>
+                  </div>
+                  <button
+                      class="mt-4 w-full px-4 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-300 ease-in-out"
+                      on:click=handle_submit
+                  >
+                      "Подтвердить город"
+                  </button>
+                  {move || {
+                      let error = error_message.get();
+                      if !error.is_empty() {
+                          view! {
+                              <p class="mt-2 text-sm text-red-600 bg-red-100 p-2 rounded">{error}</p>
+                          }
+                      } else {
+                          view! { <p></p> }
+                      }
+                  }}
+              </div>
+          }
+      }
+      </code city_input.rs>
       layout.rs
       <code layout.rs>
       use leptos::*;
@@ -255,78 +255,18 @@ pub fn CityInput() -> impl IntoView {
     </code main.rs>
     app.rs
     <code app.rs>
-use leptos::*;
-use leptos_meta::*;
-use crate::components::layout::Layout;
+    use leptos::*;
+    use leptos_meta::*;
+    use crate::components::layout::Layout;
 
-#[component]
-pub fn App() -> impl IntoView {
-    view! {
-        <Stylesheet id="leptos" href="/style/output.css"/>
-        <Layout /> // лучшая абстракция 
+    #[component]
+    pub fn App() -> impl IntoView {
+        view! {
+            <Stylesheet id="leptos" href="/style/output.css"/>
+            <Layout />
+        }
     }
-} // shuba 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// use leptos::*;
-// use crate::components::layout::Layout;
-//
-// #[component]
-// pub fn App() -> impl IntoView {
-//     view! { // здесь мы вызываем компонент Layout, который является верховной абстракцией всего проекта
-//         <Layout /> // то есть мы создали слой в виде компонента Layout
-//     } // который по сути является левой 1/3 части, которая у нас является Меню
-// } // и в этом меню у нас уже перечислены пункты меню
-// // (Магазин, Личный кабинет, Сообщения, ИИ-ассистент)
-// // и туда можно вносить сколько угодно новых пунктов или удалять их оттуда в виде компонентов,
-// // которые мы прописываем на отдельных страницах, одновременно не забывая прописать в компоненте Layout
-// // например, мы уже внесли в Layout компонент ввода города, который будет отображаться на других 2/3 части страницы
-/*
-    <div class="flex h-screen">
-        <nav class="w-1/3 bg-gray-800 text-white p-4">
-            <ul>
-                <li>"Магазин"</li>
-                <li>"Личный кабинет"</li>
-                <li>"Сообщения"</li>
-                <li>"ИИ-ассистент"</li>
-            </ul>
-        </nav>
-        <main class="w-2/3 p-4">
-            <city_input /> // вот - вводим страницу ввода города, которая автоматически занимает 2/3 страницы
-            // и наша крутизна с тобой еще и в том, что какой бы пункт меню мы бы ни добавили сюда,
-            // он будет отображаться также на 2/3 экрана справа в виде отдельной страницы, принадлежащей своему пункту из меню
-            // и прописанным нами кодом в отдельном файле этого компонента, путь к которому мы также должны указать
-            // вверху в компоненте Layout
-
-        </main>
-    </div>
-
- */
-
-</code app.rs>
+    </code app.rs>
   style
     main.scss
     <code main.scss>
@@ -436,12 +376,10 @@ pub fn App() -> impl IntoView {
   </code Cargo.toml>
   input.css
   <code input.css>
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-
-</code input.css>
+  @tailwind base;
+  @tailwind components;
+  @tailwind utilities;
+  </code input.css>
   LICENSE
   package.json
   <code package.json>
