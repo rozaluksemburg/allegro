@@ -1,7 +1,7 @@
 use leptos::*;
 use leptos_meta::*;
 use crate::components::layout::Layout;
-
+// туман над
 #[component]
 pub fn App() -> impl IntoView {
     view! {

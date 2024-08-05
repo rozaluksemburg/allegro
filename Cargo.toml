@@ -91,6 +91,6 @@ lib-default-features = false
 # Optional. Defaults to "release".
 lib-profile-release = "wasm-release"
 
-[[bin]]
-name = "update_structure"
-path = "src/update_structure.rs"
+# [[bin]]
+# name = "update_structure"
+# path = "src/update_structure.rs"
